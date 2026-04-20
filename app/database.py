@@ -9,7 +9,7 @@ supabase = create_client(
     os.getenv("SUPABASE_KEY")
 )
 
-def save_ticket(resident_phone: str, message: str, result: dict) -> str:
+def save_ticket(resident_phone: str, message: str, result: dict) -> dict:
     response = supabase.table("tickets").insert({
         "resident_phone": resident_phone,
         "message": message,
@@ -21,4 +21,4 @@ def save_ticket(resident_phone: str, message: str, result: dict) -> str:
 
     ticket_id = response.data[0]["id"]
     short_id = ticket_id[:8].upper()
-    return short_id
+    return {"id": ticket_id, "short_id": short_id}

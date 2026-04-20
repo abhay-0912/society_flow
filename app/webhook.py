@@ -24,31 +24,37 @@ async def whatsapp_webhook(
     print(f"From: {From}")
     print(f"Message: {Body}")
 
-    result = classify_complaint(Body)
-    ticket_id = save_ticket(From, Body, result)
+    try:
+        result = classify_complaint(Body)
+        ticket = save_ticket(From, Body, result)
+        ticket_id = ticket["id"]
+        short_ticket_id = ticket["short_id"]
 
-    print(f"Category  : {result['category']}")
-    print(f"Priority  : {result['priority']}")
-    print(f"Ticket ID : {ticket_id}")
+        print(f"Category  : {result['category']}")
+        print(f"Priority  : {result['priority']}")
+        print(f"Ticket ID : {short_ticket_id}")
 
-    worker = find_best_worker(result["category"])
+        worker = find_best_worker(result["category"])
 
-    if worker:
-        assign_worker(ticket_id, worker, result["summary"], From)
-        reply = (
-            f"{result['reply']}\n\n"
-            f"Ticket ID: *{ticket_id}*\n"
-            f"Worker *{worker['name']}* has been assigned and will reach you shortly."
-        )
-        print(f"Assigned  : {worker['name']}")
-    else:
-        notify_no_worker(From)
-        reply = (
-            f"{result['reply']}\n\n"
-            f"Ticket ID: *{ticket_id}*\n"
-            f"We will assign a worker shortly."
-        )
-        print(f"Assigned  : No worker found")
+        if worker:
+            assign_worker(ticket_id, worker, result["summary"], From)
+            reply = (
+                f"{result['reply']}\n\n"
+                f"Ticket ID: *{short_ticket_id}*\n"
+                f"Worker *{worker['name']}* has been assigned and will reach you shortly."
+            )
+            print(f"Assigned  : {worker['name']}")
+        else:
+            notify_no_worker(From)
+            reply = (
+                f"{result['reply']}\n\n"
+                f"Ticket ID: *{short_ticket_id}*\n"
+                f"We will assign a worker shortly."
+            )
+            print(f"Assigned  : No worker found")
+    except Exception as exc:
+        print(f"Webhook error: {exc}")
+        reply = "We received your message, but our system had a temporary issue. Please try again in a minute."
 
     print(f"-------------------\n")
 

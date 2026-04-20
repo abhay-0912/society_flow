@@ -34,9 +34,11 @@ def assign_worker(ticket_id: str, worker: dict, summary: str, resident_phone: st
         "status": "assigned"
     }).eq("id", ticket_id).execute()
 
+    short_id = ticket_id[:8].upper()
+
     message = (
         f"*New Job Assigned*\n\n"
-        f"Ticket  : {ticket_id[:8].upper()}\n"
+        f"Ticket  : {short_id}\n"
         f"Issue   : {summary}\n"
         f"Contact : {resident_phone}\n\n"
         f"Reply *DONE* when completed."
