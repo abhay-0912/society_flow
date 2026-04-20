@@ -13,14 +13,23 @@ twilio_client = Client(
 TWILIO_NUMBER = os.getenv("TWILIO_WHATSAPP_NUMBER")
 
 def find_best_worker(category: str) -> dict | None:
+    normalized_category = category.strip().lower()
     response = supabase.table("workers").select("*").eq(
-        "skill", category
+        "skill", normalized_category
     ).eq(
         "status", "available"
     ).limit(1).execute()
 
     if response.data:
         return response.data[0]
+
+    # Fallback: assign any available worker if no exact skill match.
+    fallback = supabase.table("workers").select("*").eq(
+        "status", "available"
+    ).limit(1).execute()
+    if fallback.data:
+        return fallback.data[0]
+
     return None
 
 def assign_worker(ticket_id: str, worker: dict, summary: str, resident_phone: str):
@@ -44,15 +53,12 @@ def assign_worker(ticket_id: str, worker: dict, summary: str, resident_phone: st
         f"Reply *DONE* when completed."
     )
 
-    twilio_client.messages.create(
-        from_=TWILIO_NUMBER,
-        to=worker["phone"],
-        body=message
-    )
-
-def notify_no_worker(resident_phone: str):
-    twilio_client.messages.create(
-        from_=TWILIO_NUMBER,
-        to=resident_phone,
-        body="We have received your complaint. Our team will assign a worker shortly and notify you."
-    )
+    try:
+        twilio_client.messages.create(
+            from_=TWILIO_NUMBER,
+            to=worker["phone"],
+            body=message
+        )
+    except Exception as exc:
+        # Do not fail resident webhook if worker outbound message cannot be sent.
+        print(f"Worker notify error: {exc}")

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Form
 from fastapi.responses import PlainTextResponse
 from app.ai import classify_complaint
 from app.database import save_ticket, supabase
-from app.dispatch import find_best_worker, assign_worker, notify_no_worker
+from app.dispatch import find_best_worker, assign_worker
 
 router = APIRouter()
 
@@ -39,17 +39,26 @@ async def whatsapp_webhook(
         if worker:
             assign_worker(ticket_id, worker, result["summary"], From)
             reply = (
-                f"{result['reply']}\n\n"
-                f"Ticket ID: *{short_ticket_id}*\n"
-                f"Worker *{worker['name']}* has been assigned and will reach you shortly."
+                "✅ *Complaint Registered*\n"
+                "──────────────────\n"
+                f"Ticket ID : *{short_ticket_id}*\n"
+                f"Category  : {result['category'].capitalize()}\n"
+                f"Priority  : {result['priority'].upper()}\n"
+                "──────────────────\n"
+                f"Worker *{worker['name']}* has been assigned.\n"
+                "You will be notified once resolved."
             )
             print(f"Assigned  : {worker['name']}")
         else:
-            notify_no_worker(From)
             reply = (
-                f"{result['reply']}\n\n"
-                f"Ticket ID: *{short_ticket_id}*\n"
-                f"We will assign a worker shortly."
+                "✅ *Complaint Registered*\n"
+                "──────────────────\n"
+                f"Ticket ID : *{short_ticket_id}*\n"
+                f"Category  : {result['category'].capitalize()}\n"
+                f"Priority  : {result['priority'].upper()}\n"
+                "──────────────────\n"
+                "Our team will assign a worker shortly.\n"
+                "You will be notified once resolved."
             )
             print(f"Assigned  : No worker found")
     except Exception as exc:
