@@ -147,11 +147,11 @@ Bot: ✅ Complaint Registered
 
 ## Screenshots / Demo
 
-> Add product screenshots here when available.
+> Add real product screenshots here when available. For now, these placeholders show the recommended layout.
 
 | Home / Dashboard | WhatsApp Intake | Ticket Confirmation |
 |---|---|---|
-| _Placeholder_ | _Placeholder_ | _Placeholder_ |
+| _Dashboard overview screenshot_ | _WhatsApp conversation screenshot_ | _Ticket confirmation screenshot_ |
 
 ## Roadmap
 
